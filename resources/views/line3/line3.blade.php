@@ -39,7 +39,10 @@
                                             <input type="text" name="Assy" class="form-control">
                                         </td>
                                         <td>
-                                            <input type="number" name="FlangeNon" class="form-control" min="0" max="1">
+                                            <select id="FlangeNon" name="FlangeNon" class="form-control">
+                                            <option hidden>Choose</option>
+                                            <option value="Flange"> Flange</option>
+                                            <option value="Non Flange">Non Flange</option>
                                         </td>
                                         <td>
                                             <input type="text" name="Wclutch" class="form-control">
@@ -60,12 +63,13 @@
             <div class="col-md-12">
                 <div>
                     <h3 class="text-center my-4">Line3</h3>
+                    <div class="text-right mb-3">
+                        <button class="btn btn-primary" onclick="exportToCSV()">Export</button>
                     <hr>
                 </div>
                 <div class="card border-0 shadow-sm rounded">
                     <div class="card-body">
-                        <a href="{{ route('line3s.create') }}" class="btn btn-md btn-success mb-3">TAMBAH POST</a>
-                        <table class="table table-bordered">
+                        <table id="line3Table" class="table table-bordered">
                             <thead>
                 <tr>
                     <th>Part Number</th>
@@ -103,6 +107,35 @@
 </div>
 </div>
 
+<script>
+    function exportToCSV() {
+        const table = document.querySelector('#line3Table'); // Gunakan # untuk mencari id
+        const rows = table.querySelectorAll('tbody tr');
+        let csvData = [];
+
+        // Mencari baris header dengan nama kolom
+        const headerRow = table.querySelector('thead tr');
+        const headerCells = headerRow.querySelectorAll('th:not(:last-child)');
+        const headerRowData = Array.from(headerCells).map(cell => cell.textContent);
+        csvData.push(headerRowData);
+
+        for (let i = 0; i < rows.length; i++) {
+            const row = [];
+            const cells = rows[i].querySelectorAll('td:not(:last-child)');
+            for (let j = 0; j < cells.length; j++) {
+                row.push(cells[j].textContent);
+            }
+            csvData.push(row);
+        }
+
+        const csvContent = 'data:text/csv;charset=utf-8,' + csvData.map(row => row.join(',')).join('\n');
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement('a');
+        link.setAttribute('href', encodedUri);
+        link.setAttribute('download', 'line3_data.csv');
+        link.click();
+    }
+</script>
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>

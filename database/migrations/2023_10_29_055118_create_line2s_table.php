@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('PartNumber');
             $table->string('Assy');
-            $table->integer('FlangeNon');
+            $table->string('FlangeNon');
             $table->string('Wclutch');
             $table->timestamps();
         });

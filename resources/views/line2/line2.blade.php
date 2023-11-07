@@ -43,7 +43,7 @@
                                                 <option hidden>Choose</option>
                                                 <option value="Flange"> Flange</option>
                                                 <option value="Non Flange">Non Flange</option>
-                                        </td>
+                                            </td>
                                         <td>
                                             <input type="text" name="Wclutch" class="form-control">
                                         </td>
@@ -63,11 +63,14 @@
             <div class="col-md-12">
                 <div>
                     <h3 class="text-center my-4">Line2</h3>
+                    <div class="text-right mb-3">
+                        <button class="btn btn-primary" onclick="exportToCSV()">Export</button>
+                    </div>
                     <hr>
                 </div>
                 <div class="card border-0 shadow-sm rounded">
                     <div class="card-body">
-                        <table class="table table-bordered">
+                        <table id="line2Table" class="table table-bordered">
                             <thead>
                                 <tr>
                                     <th>Part Number</th>
@@ -84,15 +87,12 @@
                                         <td>{{ $line2->Assy }}</td>
                                         <td>{{ $line2->FlangeNon }}</td>
                                         <td>{{ $line2->Wclutch }}</td>
-
                                         <td class="text-center">
-                                            <form onsubmit="return confirm('Apakah Anda Yakin ?');" action="{{ route('line2s.destroy', $line2->id) }}" method="POST">
-                                                <a href="{{ route('line2s.edit', $line2->id) }}" class="btn btn-sm btn-primary">EDIT</a>
-                                                <form action="{{ route('line2s.destroy', $line2->id) }}" method="POST" style="display: inline;">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Apakah Anda yakin?')">Delete</button>
-                                                </form>
+                                            <a href="{{ route('line2s.edit', $line2->id) }}" class="btn btn-sm btn-primary">EDIT</a>
+                                            <form action="{{ route('line2s.destroy', $line2->id) }}" method="POST" style="display: inline;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger" onclick="return confirm('Apakah Anda yakin?')">Delete</button>
                                             </form>
                                         </td>
                                     </tr>
@@ -105,9 +105,39 @@
         </div>
     </div>
 
+    <script>
+        function exportToCSV() {
+            const table = document.getElementById('line2Table');
+            const rows = table.querySelectorAll('tbody tr');
+            let csvData = [];
+
+            // Mencari baris header dengan nama kolom
+            const headerRow = table.querySelector('thead tr');
+            const headerCells = headerRow.querySelectorAll('th:not(:last-child)'); // Menyembunyikan kolom terakhir "Aksi"
+            const headerRowData = Array.from(headerCells).map(cell => cell.textContent);
+            csvData.push(headerRowData);
+
+            for (let i = 0; i < rows.length; i++) {
+                const row = [];
+                const cells = rows[i].querySelectorAll('td:not(:last-child)'); // Menyembunyikan kolom terakhir "Aksi"
+                for (let j = 0; j < cells.length; j++) {
+                    row.push(cells[j].textContent);
+                }
+                csvData.push(row);
+            }
+
+            const csvContent = 'data:text/csv;charset=utf-8,' + csvData.map(row => row.join(',')).join('\n');
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', 'line2_data.csv');
+            link.click();
+        }
+    </script>
+
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-
 </body>
 </html>

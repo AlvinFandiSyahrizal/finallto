@@ -19,8 +19,6 @@ class JadwalLine2Controller extends Controller
         return view('jadwalline2.jadwalline2', compact('jadwal_line2s', 'line2Data'));
     }
 
-
-
     public function create(): view
     {
         $line2Data = Line2::pluck('FlangeNon', 'PartNumber');
@@ -58,7 +56,7 @@ class JadwalLine2Controller extends Controller
             ]);
 
             if ($remainingQuantity > 0) {
-                $jam->addSeconds(420); // Tambahkan waktu 7 menit (420 detik) per setiap kelompok 20 quantity
+                $jam->addSeconds(360); // 6 menit / 20 quantity
             }
         }
 
@@ -83,7 +81,7 @@ class JadwalLine2Controller extends Controller
             'Jam' => 'required|date_format:H:i',
             'Tanggal' => 'required|date',
             'PartNumber' => 'required',
-            'FlangeNon' => 'required|numeric|min:0',
+            'FlangeNon' => 'required',
             'Quantity' => 'required|numeric|min:0',
         ]);
 
@@ -107,10 +105,13 @@ class JadwalLine2Controller extends Controller
         return redirect()->route('jadwalline2.index')->with(['success' => 'Data Berhasil Dihapus!']);
     }
 
-    public function getFlangeNon($partNumber)
-{
-    $flangeNon = Line2::where('PartNumber', $partNumber)->first();
-    return response()->json($flangeNon);
-}
+
+    public function getFlangeNonFromLine2s($partNumber)
+    {
+
+        $flangeNon = Line2::where('part_number', $partNumber)->first()->flangeNon;
+
+        return response()->json(['flangeNon' => $flangeNon]);
+    }
 
 }

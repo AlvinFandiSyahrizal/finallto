@@ -18,9 +18,7 @@ class Line3Controller extends Controller
      */
     public function index(): View // Perbaiki tipe kembalian
     {
-        //get posts
-        $line3s = Line3::latest()->paginate(50);
-        //render view with posts
+        $line3s = Line3::paginate(50);
         return view('line3.line3', compact('line3s'));
     }
     /**
@@ -44,7 +42,7 @@ class Line3Controller extends Controller
         $this->validate($request, [
             'PartNumber' => 'required',
             'Assy' => 'required',
-            'FlangeNon' => 'required|numeric|min:0',
+            'FlangeNon' => 'required',
             'Wclutch' => 'required',
 
         ]);
@@ -90,7 +88,7 @@ class Line3Controller extends Controller
          $this->validate($request, [
             'PartNumber' => 'required',
             'Assy' => 'required',
-            'FlangeNon' => 'required|numeric|min:0',
+            'FlangeNon' => 'required',
             'Wclutch' => 'required',
          ]);
 

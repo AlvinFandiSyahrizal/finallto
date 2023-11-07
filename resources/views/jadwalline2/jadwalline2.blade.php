@@ -43,16 +43,14 @@
                                         <select id="line2Dropdown" name="PartNumber" class="form-control">
                                             <option value="" data-flange="">Pilih Part Number</option>
                                             @foreach ($line2Data as $partNumber2 => $flangeNon)
-                                                <option value="{{ $partNumber2 }}">{{ $partNumber2 }}</option>
+                                                <option value="{{ $partNumber2 }}" data-flange="{{ $flangeNon }}">{{ $partNumber2 }}</option>
                                             @endforeach
                                         </select>
                                     </td>
                                     <td>
-                                        <select id="FlangeNon" name="FlangeNon" class="form-control">
-                                        <option hidden>Choose</option>
-                                        <option value="Flange"> Flange</option>
-                                        <option value="Non Flange">Non Flange</option>
+                                        <input type="text" id="FlangeNon" name="FlangeNon" class="form-control" readonly>
                                     </td>
+
                                     <td>
                                         <input type="number" name="Quantity" class="form-control" min="0" step="10">
                                     </td>
@@ -73,10 +71,12 @@
         <div class="col-md-12">
             <div>
                 <h3 class="text-center my-4">Jadwal Line2</h3>
+                <div class="text-right mb-3">
+                    <button class="btn btn-primary" onclick="exportToCSV()">Export</button>
                 <hr>
             </div>
             <div class="mb-3">
-                <table class="table table-bordered">
+                <table id="line2Jadwal" class="table table-bordered">
                     <thead>
                         <tr>
                             <th>Jam</th>
@@ -118,37 +118,61 @@
     </div>
 </div>
 
+<script>
+    function exportToCSV() {
+        const table = document.querySelector('#line2Jadwal'); // Pilih tabel dengan id 'line2Jadwal'
+        const rows = table.querySelectorAll('tbody tr');
+        let csvData = [];
+
+        // Mencari baris header dengan nama kolom
+        const headerRow = table.querySelector('thead tr');
+        const headerCells = headerRow.querySelectorAll('th:not(:last-child)'); // Sisakan header kecuali kolom 'Aksi'
+        const headerRowData = Array.from(headerCells).map(cell => cell.textContent);
+        csvData.push(headerRowData);
+
+        for (let i = 0; i < rows.length; i++) {
+            const row = [];
+            const cells = rows[i].querySelectorAll('td:not(:last-child)'); // Sisakan kolom data kecuali kolom 'Aksi'
+            for (let j = 0; j < cells.length; j++) {
+                row.push(cells[j].textContent);
+            }
+            csvData.push(row);
+        }
+
+        const csvContent = 'data:text/csv;charset=utf-8,' + csvData.map(row => row.join(',')).join('\n');
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement('a');
+        link.setAttribute('href', encodedUri);
+        link.setAttribute('download', 'jadwal_line2.csv');
+        link.click();
+    }
+</script>
+
+
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
-    <script>
-        $(document).ready(function() {
-            $("#Tanggal").datepicker({
-                dateFormat: 'yy-mm-dd'
-            });
-
-            $('#line2Dropdown').on('change', function() {
-                var selectedPartNumber = $(this).val();
-
-                if (selectedPartNumber) {
-                    // Lakukan permintaan AJAX untuk mendapatkan data FlangeNon berdasarkan PartNumber yang dipilih
-                    $.ajax({
-                        url: '/getFlangeNon/' + selectedPartNumber,
-                        type: 'GET',
-                        success: function(data) {
-                            // Mengatur nilai 'FlangeNon' sesuai dengan data yang diterima dari server
-                            $('#FlangeNon').val(data.FlangeNon);
-                        }
-                    });
-                } else {
-                    // Jika tidak ada PartNumber yang dipilih, atur nilai 'FlangeNon' menjadi kosong
-                    $('#FlangeNon').val('');
-                }
-            });
+<script>
+    $(document).ready(function() {
+        $("#Tanggal").datepicker({
+            dateFormat: 'yy-mm-dd'
         });
-    </script>
 
+        $('#line2Dropdown').on('change', function() {
+            var selectedPartNumber = $(this).val();
+            var selectedFlangeNon = $(this).find('option:selected').data('flange');
+
+            if (selectedPartNumber) {
+                $('#FlangeNon').val(selectedFlangeNon);
+            } else {
+                $('#FlangeNon').val(''); // Mengosongkan nilai jika 'Part Number' tidak dipilih
+            }
+        });
+    });
+</script>
 
 </body>
 </html>

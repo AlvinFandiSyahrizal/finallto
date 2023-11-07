@@ -19,8 +19,6 @@ class JadwalLine3Controller extends Controller
         return view('jadwalline3.jadwalline3', compact('jadwal_line3s', 'line3Data'));
     }
 
-
-
     public function create(): view
     {
         $line3Data = Line3::pluck('FlangeNon', 'PartNumber');
@@ -29,23 +27,14 @@ class JadwalLine3Controller extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        // dd($request->all());
         $request->validate([
             'Jam' => 'required',
             'Tanggal' => 'required|date',
             'PartNumber' => 'required',
+            'FlangeNon' => 'required',
             'Quantity' => 'required|numeric|min:0',
         ]);
-
-        // Periksa apakah FlangeNon disertakan dalam permintaan
-        if ($request->has('FlangeNon')) {
-            $request->validate([
-                'FlangeNon' => 'numeric|min:0',
-            ]);
-            $flangeNon = $request->FlangeNon;
-        } else {
-            // Jika tidak disertakan, set FlangeNon ke null
-            $flangeNon = null;
-        }
 
         $remainingQuantity = $request->Quantity;
         $jam = Carbon::parse($request->Jam); // Menggunakan jam yang diberikan
@@ -63,7 +52,7 @@ class JadwalLine3Controller extends Controller
                 'Jam' => $jam->format('H:i:s'),
                 'Tanggal' => Carbon::parse($request->Tanggal),
                 'PartNumber' => $request->PartNumber,
-                'FlangeNon' => $flangeNon,
+                'FlangeNon' => $request->FlangeNon,
                 'Quantity' => $quantityToCreate,
             ]);
 
@@ -74,10 +63,6 @@ class JadwalLine3Controller extends Controller
 
         return redirect()->route('jadwalline3.index')->with(['success' => 'Data Berhasil Disimpan!']);
     }
-
-
-
-
 
     public function show($id): view
     {
@@ -97,7 +82,7 @@ class JadwalLine3Controller extends Controller
             'Jam' => 'required|date_format:H:i',
             'Tanggal' => 'required|date',
             'PartNumber' => 'required',
-            'FlangeNon' => 'required|numeric|min:0',
+            'FlangeNon' => 'required',
             'Quantity' => 'required|numeric|min:0',
         ]);
 
@@ -121,10 +106,13 @@ class JadwalLine3Controller extends Controller
         return redirect()->route('jadwalline3.index')->with(['success' => 'Data Berhasil Dihapus!']);
     }
 
-    public function getFlangeNon($partNumber)
-{
-    $flangeNon = Line3::where('PartNumber', $partNumber)->first();
-    return response()->json($flangeNon);
-}
+
+    public function getFlangeNonFromLine3s($partNumber)
+    {
+
+        $flangeNon = Line3::where('part_number', $partNumber)->first()->flangeNon;
+
+        return response()->json(['flangeNon' => $flangeNon]);
+    }
 
 }

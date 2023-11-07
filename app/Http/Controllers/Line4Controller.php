@@ -16,11 +16,9 @@ class Line4Controller extends Controller
      *
      * @return View
      */
-    public function index(): View // Perbaiki tipe kembalian
+    public function index(): View
     {
-        //get posts
-        $line4s = Line4::latest()->paginate(50);
-        //render view with posts
+        $line4s = Line4::paginate(50);
         return view('line4.line4', compact('line4s'));
     }
     /**
@@ -44,7 +42,7 @@ class Line4Controller extends Controller
         $this->validate($request, [
             'PartNumber' => 'required',
             'Assy' => 'required',
-            'FlangeNon' => 'required|numeric|min:0',
+            'FlangeNon' => 'required',
             'Wclutch' => 'required',
 
         ]);
@@ -90,7 +88,7 @@ class Line4Controller extends Controller
          $this->validate($request, [
             'PartNumber' => 'required',
             'Assy' => 'required',
-            'FlangeNon' => 'required|numeric|min:0',
+            'FlangeNon' => 'required',
             'Wclutch' => 'required',
          ]);
 

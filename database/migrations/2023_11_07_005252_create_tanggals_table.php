@@ -11,13 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('jadwal_line3s', function (Blueprint $table) {
+        Schema::create('tanggals', function (Blueprint $table) {
             $table->id();
-            $table->time('Jam');
-            $table->date('Tanggal');
-            $table->string('PartNumber');
-            $table->string('FlangeNon');
-            $table->integer('Quantity');
             $table->timestamps();
         });
     }
@@ -27,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('jadwal_line3s');
+        Schema::dropIfExists('tanggals');
     }
 };

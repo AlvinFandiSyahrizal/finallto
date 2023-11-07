@@ -16,7 +16,7 @@ return new class extends Migration
             $table->time('Jam');
             $table->date('Tanggal');
             $table->string('PartNumber');
-            $table->integer('FlangeNon');
+            $table->string('FlangeNon');
             $table->integer('Quantity');
             $table->timestamps();
         });

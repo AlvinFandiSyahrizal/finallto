@@ -12,7 +12,7 @@ class Line2Controller extends Controller
 {
     public function index(): View
     {
-        $line2s = Line2::latest()->paginate(50);
+        $line2s = Line2::paginate(50);
         return view('line2.line2', compact('line2s'));
 
     }
@@ -27,7 +27,7 @@ class Line2Controller extends Controller
         $this->validate($request, [
             'PartNumber' => 'required',
             'Assy' => 'required',
-            'FlangeNon' => 'required|numeric|min:0',
+            'FlangeNon' => 'required',
             'Wclutch' => 'required',
         ]);
 
@@ -52,7 +52,7 @@ class Line2Controller extends Controller
         $this->validate($request, [
             'PartNumber' => 'required',
             'Assy' => 'required',
-            'FlangeNon' => 'required|numeric|min:0',
+            'FlangeNon' => 'required',
             'Wclutch' => 'required',
         ]);
 
