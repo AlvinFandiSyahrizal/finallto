@@ -109,10 +109,13 @@ class JadwalLine3Controller extends Controller
 
     public function getFlangeNonFromLine3s($partNumber)
     {
+        $line = Line3::where('part_number', $partNumber)->first();
 
-        $flangeNon = Line3::where('part_number', $partNumber)->first()->flangeNon;
+        if ($line) {
+            $flangeNon = $line->flangeNon;
+            return response()->json(['flangeNon' => $flangeNon]);
+        }
 
-        return response()->json(['flangeNon' => $flangeNon]);
+        return response()->json(['error' => 'Part number not found'], 404);
     }
-
 }

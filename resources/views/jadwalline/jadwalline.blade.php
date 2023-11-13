@@ -31,11 +31,9 @@
 
         .form-control {
             width: 200px;
-        }
-
-        .form-control {
             height: 40px;
         }
+
     </style>
 </head>
 <body>
@@ -45,7 +43,7 @@
             <div>
                 <h3 class="text-center my-5">Input Jadwal Line</h3>
                 <hr>
-                <form id="lineForm" method="POST">
+                <form id="lineForm" method="POST" action="{{ route('simpanJadwalLine') }}">
                     @csrf
                     <div class="form-group">
                         <label for="Line">Line:</label>
@@ -199,33 +197,33 @@
         // });
 
  // Event listener saat tombol "Export" diklik
-$("#exportButton").on("click", function(e) {
-    e.preventDefault(); // Mencegah tindakan default tombol
+ $("#exportButton").on("click", function(e) {
+        e.preventDefault(); // Mencegah tindakan default tombol
 
-    // Mendefinisikan data untuk setiap Line
-    var line2Data = collectTableData("#line2Jadwal");
-    var line3Data = collectTableData("#line3Jadwal");
-    var line4Data = collectTableData("#line4Jadwal");
+        // Mendefinisikan data untuk setiap Line
+        var line2Data = collectTableData("#line2Jadwal");
+        var line3Data = collectTableData("#line3Jadwal");
+        var line4Data = collectTableData("#line4Jadwal");
 
-    // Menggabungkan data dari ketiga Line
-    var combinedData = combineData(line2Data, line3Data, line4Data);
+        // Menggabungkan data dari ketiga Line
+        var combinedData = combineData(line2Data, line3Data, line4Data);
 
-    // Menggabungkan data menjadi satu string CSV
-    var csvContent = formatDataToCSV(combinedData);
+        // Menggabungkan data menjadi satu string CSV
+        var csvContent = formatDataToCSV(combinedData);
 
-    // Menghasilkan file CSV dan mengizinkan pengguna mengunduhnya
-    var blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement("a");
-    a.style.display = "none";
-    a.href = url;
-    a.download = "combined_line_data.csv";
-    document.body.appendChild(a);
-    a.click();
-    URL.revokeObjectURL(url);
+        // Menghasilkan file CSV dan mengizinkan pengguna mengunduhnya
+        var blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.style.display = "none";
+        a.href = url;
+        a.download = "combined_line_data.csv";
+        document.body.appendChild(a);
+        a.click();
+        URL.revokeObjectURL(url);
 
-    // Setelah kode ekspor selesai, tombol akan melanjutkan tindakan defaultnya (yang telah dicegah di atas)
-});
+        // Setelah kode ekspor selesai, tombol akan melanjutkan tindakan defaultnya (yang telah dicegah di atas)
+    });
 
 // Fungsi untuk menggabungkan data dari ketiga Line secara horizontal
 function combineData(line2Data, line3Data, line4Data) {
@@ -331,7 +329,7 @@ $("#PartNumber").on("change", function() {
         });
 
         $('#lineForm').submit(function(e) {
-            e.preventDefault();
+    e.preventDefault();
 
     var line = $('#Line').val();
     var jam = $('#Jam').val();
@@ -340,56 +338,74 @@ $("#PartNumber").on("change", function() {
     var flangeNon = $('#FlangeNon').val();
     var quantity = $('#Quantity').val();
 
-    // Membuat objek data untuk dikirim
-    var data = {
-        Line: line,
-        Jam: jam,
-        Tanggal: tanggal,
-        PartNumber: partNumber,
-        FlangeNon: flangeNon,
-        Quantity: quantity
-    };
-
-    // Menyesuaikan URL aksi berdasarkan Line yang dipilih
-    var actionUrl = '/simpanJadwal'; // URL default
+    var actionUrl = '/simpanJadwal'; // Default URL
+    var formAction = '/simpanJadwal'; // Default form action
 
     if (line === 'Line2') {
-        actionUrl = '/simpanJadwalLine2'; // Sesuaikan dengan URL untuk Line 2
+        actionUrl = '/simpanJadwalLine2';
+        formAction = "{{ route('jadwalline2.store') }}"; // URL and form action for Line 2
     } else if (line === 'Line3') {
-        actionUrl = '/simpanJadwalLine3'; // Sesuaikan dengan URL untuk Line 3
+        actionUrl = '/simpanJadwalLine3';
+        formAction = "{{ route('jadwalline3.store') }}"; // URL and form action for Line 3
     } else if (line === 'Line4') {
-        actionUrl = '/simpanJadwalLine4'; // Sesuaikan dengan URL untuk Line 4
+        actionUrl = '/simpanJadwalLine4';
+        formAction = "{{ route('jadwalline4.store') }}"; // URL and form action for Line 4
     }
 
-    // Mengirim data ke server melalui AJAX dengan URL aksi yang sesuai
+    // Update the form action
+    $("#lineForm").attr("action", formAction);
+
+    // Use the updated actionUrl in your AJAX request
     $.ajax({
-    url: actionUrl, // Ini harus sesuai dengan URL yang sesuai dengan Line yang dipilih
-    method: 'POST',
-    data: {
-        Line: line,
-        Jam: jam,
-        Tanggal: tanggal,
-        PartNumber: partNumber,
-        FlangeNon: flangeNon,
-        Quantity: quantity
-    },
-    success: function(response) {
-        showToastMessage('success', response.message);
-    },
-             error: function(error) {
-    console.log(error); // Tampilkan pesan kesalahan di konsol
-    if (error.status === 422) {
-        var errors = error.responseJSON.errors;
-        for (var key in errors) {
-            showToastMessage('error', errors[key][0]);
-        }
-    } else {
-        showToastMessage('error', 'Gagal menyimpan jadwal Line.');
-    }
-}
+        url: actionUrl,
+        method: 'POST',
+        data: {
+            Line: line,
+            Jam: jam,
+            Tanggal: tanggal,
+            PartNumber: partNumber,
+            FlangeNon: flangeNon,
+            Quantity: quantity
+        },
+        success: function (response) {
+            // Modify this part to handle success as needed
+            showToastMessage('success', response.message);
 
-            });
-        });
+            // Optionally, you can reset the form after a successful submission
+            $('#lineForm')[0].reset();
+        },
+        error: function (error) {
+            console.log(error);
+            if (error.status === 422) {
+                var errors = error.responseJSON.errors;
+                for (var key in errors) {
+                    showToastMessage('error', errors[key][0]);
+                }
+            } else {
+                showToastMessage('error', 'gabisa ke save bang');
+            }
+        }
+    });
+});
+
+        function showToastMessage(type, message) {
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000"
+            };
+
+            if (type === 'success') {
+                toastr.success(message);
+            } else if (type === 'error') {
+                toastr.error(message);
+            }
+        }
+
     });
 </script>
 </body>

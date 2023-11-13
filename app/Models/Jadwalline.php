@@ -14,6 +14,7 @@ class Jadwalline extends Model
      * @var array
      */
     protected $fillable = [
+        'Line',
         'Jam',
         'Tanggal',
         'PartNumber',

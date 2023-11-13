@@ -107,12 +107,15 @@ class JadwalLine4Controller extends Controller
         return redirect()->route('jadwalline4.index')->with(['success' => 'Data Berhasil Dihapus!']);
     }
 
-    public function getFlangeNonFromLine2s($partNumber)
+    public function getFlangeNonFromLine4s($partNumber)
     {
+        $line = Line4::where('part_number', $partNumber)->first();
 
-        $flangeNon = Line4::where('part_number', $partNumber)->first()->flangeNon;
+        if ($line) {
+            $flangeNon = $line->flangeNon;
+            return response()->json(['flangeNon' => $flangeNon]);
+        }
 
-        return response()->json(['flangeNon' => $flangeNon]);
+        return response()->json(['error' => 'Part number not found'], 404);
     }
-
 }

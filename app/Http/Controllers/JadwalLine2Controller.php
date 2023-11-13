@@ -88,7 +88,7 @@ class JadwalLine2Controller extends Controller
         $jadwal_line2 = JadwalLine2::findOrFail($id);
 
         $jadwal_line2->update([
-            'Jam' => $request->Jam,
+            'Jam' => Carbon::parse($request->Jam)->format('H:i:s'),
             'Tanggal' => Carbon::parse($request->Tanggal),
             'PartNumber' => $request->PartNumber,
             'FlangeNon' => $request->FlangeNon,
@@ -108,10 +108,15 @@ class JadwalLine2Controller extends Controller
 
     public function getFlangeNonFromLine2s($partNumber)
     {
+        $line = Line2::where('part_number', $partNumber)->first();
 
-        $flangeNon = Line2::where('part_number', $partNumber)->first()->flangeNon;
+        if ($line) {
+            $flangeNon = $line->flangeNon;
+            return response()->json(['flangeNon' => $flangeNon]);
+        }
 
-        return response()->json(['flangeNon' => $flangeNon]);
+        return response()->json(['error' => 'Part number not found'], 404);
     }
+
 
 }

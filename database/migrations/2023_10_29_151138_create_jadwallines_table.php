@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('jadwallines', function (Blueprint $table) {
             $table->id();
+            $table->string('Line');
             $table->string('Jam');
             $table->date('Tanggal');
             $table->string('PartNumber');
