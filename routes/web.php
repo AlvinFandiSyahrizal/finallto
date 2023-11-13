@@ -17,4 +17,8 @@ Route::resource('/jadwalline3', \App\Http\Controllers\JadwalLine3Controller::cla
 Route::resource('/jadwalline4', \App\Http\Controllers\JadwalLine4Controller::class);
 Route::resource('/inputs', \App\Http\Controllers\InputController::class);
 
+Route::resource('schedule', \App\Http\Controllers\ScheduleController::class);
 Route::resource('tanggal', \App\Http\Controllers\TanggalController::class);
+
+Route::resource('test', \App\Http\Controllers\TestController::class);
+
