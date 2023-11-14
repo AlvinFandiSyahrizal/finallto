@@ -188,6 +188,8 @@
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+
 
     <script>
        // Event listener saat dokumen siap
@@ -196,96 +198,134 @@
         //     dateFormat: 'yy-mm-dd'
         // });
 
- // Event listener saat tombol "Export" diklik
- $("#exportButton").on("click", function(e) {
-        e.preventDefault(); // Mencegah tindakan default tombol
+// Event listener saat tombol "Export" diklik
+$("#exportButton").on("click", function (e) {
+    e.preventDefault(); // Mencegah tindakan default tombol
 
-        // Mendefinisikan data untuk setiap Line
-        var line2Data = collectTableData("#line2Jadwal");
-        var line3Data = collectTableData("#line3Jadwal");
-        var line4Data = collectTableData("#line4Jadwal");
+    // Mendefinisikan data untuk setiap Line
+    var line2Data = collectTableData("#line2Jadwal");
+    var line3Data = collectTableData("#line3Jadwal");
+    var line4Data = collectTableData("#line4Jadwal");
 
-        // Menggabungkan data dari ketiga Line
-        var combinedData = combineData(line2Data, line3Data, line4Data);
+    // Menggabungkan data dari ketiga Line
+    var combinedData = combineData(line2Data, line3Data, line4Data);
 
-        // Menggabungkan data menjadi satu string CSV
-        var csvContent = formatDataToCSV(combinedData);
+    // Hasilkan file Excel (XLSX) dan izinkan pengguna mengunduhnya
+    var workbook = XLSX.utils.book_new();
+    var worksheet = XLSX.utils.aoa_to_sheet(combinedData);
 
-        // Menghasilkan file CSV dan mengizinkan pengguna mengunduhnya
-        var blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement("a");
-        a.style.display = "none";
-        a.href = url;
-        a.download = "combined_line_data.csv";
-        document.body.appendChild(a);
-        a.click();
-        URL.revokeObjectURL(url);
+    // Menentukan lebar kolom untuk menata tampilan di Excel
+    var colWidths = [
+        { wpx: 80 }, // Jam
+        { wpx: 100 }, // Tanggal
+        { wpx: 150 }, // Part Number
+        { wpx: 100 }, // Flange/Non
+        { wpx: 80 }, // Quantity
+        { wpx: 80 }, // Line
+    ];
 
-        // Setelah kode ekspor selesai, tombol akan melanjutkan tindakan defaultnya (yang telah dicegah di atas)
-    });
+    worksheet['!cols'] = colWidths;
 
-// Fungsi untuk menggabungkan data dari ketiga Line secara horizontal
+    // Tambahkan sheet ke workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Combined Line Data");
+
+    // Hasilkan file XLSX dan izinkan pengguna mengunduhnya
+    XLSX.writeFile(workbook, "combined_line_data.xlsx");
+});
+
 function combineData(line2Data, line3Data, line4Data) {
     var combinedData = [];
-    // Tambahkan baris untuk nama Line
-    var lineNames = [ "", "","Line 2 Data", "","","","","","",  "Line 3 Data", "","","","","","", "Line 4 Data"];
+
+    // Tambahkan baris untuk nama Line di bagian awal combinedData
+    var lineNames = ["", "", "Line 2 Data", "", "", "", "", "", "", "Line 3 Data", "", "", "", "", "", "", "Line 4 Data"];
     combinedData.push(lineNames);
 
-    for (var i = 0; i < Math.max(line2Data.length, line3Data.length, line4Data.length); i++) {
-        var rowData = [];
+    // Tambahkan header untuk Line 2, Line 3, dan Line 4 di bagian awal combinedData
+    var headerRow = ["Jam", "Tanggal", "Part Number", "Flange/Non", "Quantity", "Line"];
+    combinedData.push(headerRow.concat([""], headerRow, [""], headerRow));
 
-        if (i < line2Data.length) {
-            rowData = rowData.concat(line2Data[i]);
-        } else {
-            rowData = rowData.concat(["", ""]); // Add empty cells if data not available
-        }
+    // Ambil panjang data terpanjang di antara Line 2, Line 3, dan Line 4
+    var maxLength = Math.max(line2Data.length, line3Data.length, line4Data.length);
 
-        rowData = rowData.concat(["", ""]); // Add empty cells to create space
+// Iterasi sepanjang panjang data terpanjang
+for (var i = 0; i < maxLength; i++) {
+    var rowData = [];
 
-        if (i < line3Data.length) {
-            rowData = rowData.concat(line3Data[i]);
-        } else {
-            rowData = rowData.concat(["", ""]); // Add empty cells if data not available
-        }
-
-        rowData = rowData.concat(["", ""]); // Add empty cells to create space
-
-        if (i < line4Data.length) {
-            rowData = rowData.concat(line4Data[i]);
-        } else {
-            rowData = rowData.concat(["", ""]); // Add empty cells if data not available
-        }
-
-        combinedData.push(rowData);
+    // Tambahkan data dari Line 2 jika tersedia
+    if (line2Data[i]) {
+        rowData = rowData.concat(getRowWithLineName(line2Data[i], "Line 2"));
+        // Tambahkan kolom kosong setelah Line 2
+        rowData.push("");
+    } else {
+        // Tambahkan baris kosong jika tidak ada data dari Line 2
+        rowData = rowData.concat(["", "", "", "", "", "", ""]);
     }
 
+    // Tambahkan data dari Line 3 jika tersedia
+    if (line3Data[i]) {
+        rowData = rowData.concat(getRowWithLineName(line3Data[i], "Line 3"));
+        // Tambahkan kolom kosong setelah Line 3
+        rowData.push("");
+    } else {
+        // Tambahkan baris kosong jika tidak ada data dari Line 3
+        rowData = rowData.concat(["", "", "", "", "", "", ""]);
+    }
+
+    // Tambahkan data dari Line 4 jika tersedia
+    if (line4Data[i]) {
+        rowData = rowData.concat(getRowWithLineName(line4Data[i], "Line 4"));
+        // Tambahkan kolom kosong setelah Line 4
+        rowData.push("");
+    } else {
+        // Tambahkan baris kosong jika tidak ada data dari Line 4
+        rowData = rowData.concat(["", "", "", "", "", "", ""]);
+    }
+
+    combinedData.push(rowData.filter(cell => cell !== undefined && cell !== null)); // Filter nilai undefined atau null
+}
+
     return combinedData;
+}
+// Fungsi untuk menambahkan warna ke baris berdasarkan nilai Flange/Non
+function getRowWithLineName(row, line) {
+    if (!row) {
+        return ["", "", "", "", "", line];
+    }
+
+    var colorizedRow = row.map(function (cell, index) {
+        if (index === 3) { // Kolom keempat (indeks 3) adalah kolom Flange/Non
+            var color = (cell === "Flange") ? "green" : ((cell === "Non Flange") ? "blue" : "");
+            return {
+                v: cell,
+                s: {
+                    color: { rgb: color }
+                }
+            };
+        } else {
+            return { v: cell };
+        }
+    });
+
+    colorizedRow.push({ v: line }); // Tambahkan label Line ke akhir baris
+    return colorizedRow;
 }
 
 
 // Fungsi untuk mengumpulkan data dari tabel
 function collectTableData(tableSelector) {
     var tableData = [];
-    $(tableSelector + " tbody tr").each(function() {
-        var rowData = [];
-        $(this).find("td").each(function() {
-            rowData.push($(this).text());
-        });
+
+    // Iterasi setiap baris dalam tabel
+    $(tableSelector + " tbody tr").each(function () {
+        var rowData = $(this).find("td").map(function () {
+            return $(this).text();
+        }).get();
+
         tableData.push(rowData);
     });
+
     return tableData;
 }
-
-// Fungsi untuk mengformat data ke dalam format CSV
-function formatDataToCSV(data) {
-    var csvData = data.map(function(row) {
-        return row.join(",");
-    });
-    return csvData.join("\n");
-}
-
-
 
         // Event listener saat Line berubah
         $("#Line").on("change", function() {
