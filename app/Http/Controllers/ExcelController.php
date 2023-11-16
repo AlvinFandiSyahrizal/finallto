@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-class TanggalController extends Controller
+class ExcelController extends Controller
 {
     //
 }

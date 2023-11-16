@@ -35,6 +35,18 @@ class JadwalLine2Controller extends Controller
             'Quantity' => 'required|numeric|min:0',
         ]);
 
+        $jam = Carbon::parse($request->Jam);
+        $existingJadwal = JadwalLine2::where('Jam', $jam->format('H:i:s'))
+            ->where('Tanggal', Carbon::parse($request->Tanggal))
+            ->where('PartNumber', $request->PartNumber)
+            ->where('FlangeNon', $request->FlangeNon)
+            ->first();
+
+        if ($existingJadwal) {
+            // Tampilkan pesan kesalahan jika jadwal yang sama sudah ada
+            return redirect()->route('jadwalline2.index')->with(['error' => 'Jadwal dengan waktu, tanggal, dan part number yang sama sudah ada.']);
+        }
+
         $remainingQuantity = $request->Quantity;
         $jam = Carbon::parse($request->Jam); // Menggunakan jam yang diberikan
 
